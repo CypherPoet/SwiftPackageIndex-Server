@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+  </head>
+  <body>
+    <h1><span id="sample">The font is:</span> <span id="font"></span></h1>
+    <script>
+      document.getElementById('font').innerHTML = getComputedStyle(document.getElementById('sample')).fontFamily
+    </script>
+  </body>
+</html>
