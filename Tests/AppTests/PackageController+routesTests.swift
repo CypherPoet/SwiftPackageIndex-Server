@@ -17,6 +17,74 @@
 import Vapor
 import XCTest
 
+class RaceTests: AppTestCase {
+    override func setUp() async throws {
+        try await super.setUp()
+        Current.fetchHTTPStatusCode = { _ in .notFound }
+    }
+
+    func test_race_00() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_01() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_02() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_03() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_04() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_05() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_06() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_07() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_08() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_09() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_10() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_11() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_12() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_13() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_14() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_15() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_16() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_17() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_18() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+    func test_race_19() throws {
+        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+    }
+}
+
 class PackageController_routesTests: AppTestCase {
 
     func test_show() throws {
