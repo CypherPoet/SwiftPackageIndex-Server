@@ -32,11 +32,13 @@ class RaceTests: XCTestCase {
 
     func _test() async throws {
         // Assertion failed: PostgresConnection deinitialized before being closed.
-        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
+        //        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
 
         // Assertion failed: PostgresConnection deinitialized before being closed.
-        //        let _ = try? await PackageController.ShowRoute
-        //            .query(on: app.db, owner: "owner", repository: "repository").get()
+        // Sometimes fails (even with the delay) with
+        // Metadata allocator corruption: allocation is NULL. curState: {(nil), 6856} - curStateReRead: {(nil), 6856} - newState: {0x30, 6808} - allocatedNewPage: false - requested size: 48 - sizeWithHeader: 48 - alignment: 8 - Tag: 14
+        let _ = try? await PackageController.ShowRoute
+            .query(on: app.db, owner: "owner", repository: "repository").get()
 
         // No assertion raised
         //        let _ = try? await Package.find(UUID(), on: app.db).unwrap()
