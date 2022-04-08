@@ -14,7 +14,6 @@
 
 @testable import App
 
-import SQLKit
 import Vapor
 import XCTest
 
