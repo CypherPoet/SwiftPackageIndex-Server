@@ -16,6 +16,7 @@ import SQLKit
 import XCTVapor
 @testable import App
 
+
 class AppTestCase: XCTestCase {
     var app: Application!
     let testQueue = DispatchQueue(label: "test-queue")
@@ -34,6 +35,7 @@ class AppTestCase: XCTestCase {
     }
     
     override func tearDown() async throws {
+        try await Task.sleep(milliseconds: 5)
         app.shutdown()
         try await super.tearDown()
     }
@@ -69,5 +71,12 @@ extension AppTestCase {
                     result.append("\(bind)")
             }
         }
+    }
+}
+
+
+private extension Task where Success == Never, Failure == Never {
+    static func sleep(milliseconds duration: UInt64) async throws {
+        try await sleep(nanoseconds: duration * 1_000_000)
     }
 }
