@@ -35,16 +35,6 @@ class AppTestCase: XCTestCase {
     }
     
     override func tearDown() async throws {
-        // Use Task.sleep to work around `Fatal error: Application.shutdown()` error
-        // https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/issues/1630
-        switch (isRunningOnLinux, isRunningInCI) {
-            case (true, true):
-                try await Task.sleep(milliseconds: 50)
-            case (true, false):
-                try await Task.sleep(milliseconds: 5)
-            default:
-                break
-        }
         app.shutdown()
         try await super.tearDown()
     }
@@ -80,12 +70,5 @@ extension AppTestCase {
                     result.append("\(bind)")
             }
         }
-    }
-}
-
-
-private extension Task where Success == Never, Failure == Never {
-    static func sleep(milliseconds duration: UInt64) async throws {
-        try await sleep(nanoseconds: duration * 1_000_000)
     }
 }
