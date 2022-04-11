@@ -16,7 +16,6 @@ import SQLKit
 import XCTVapor
 @testable import App
 
-
 class AppTestCase: XCTestCase {
     var app: Application!
     let testQueue = DispatchQueue(label: "test-queue")

@@ -27,14 +27,6 @@ extension XCTestCase {
         ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW")
     }
 
-    var isRunningOnLinux: Bool {
-        #if os(Linux)
-        true
-        #else
-        false
-        #endif
-    }
-
     var runImageSnapshotTests: Bool {
         ProcessInfo.processInfo.environment.keys.contains("RUN_IMAGE_SNAPSHOT_TESTS")
     }
