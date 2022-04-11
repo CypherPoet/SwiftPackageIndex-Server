@@ -34,7 +34,7 @@ class PackageController_routesTests: AppTestCase {
     }
 
     func test_show_checkingGitHubRepository_notFound() throws {
-        Current.fetchHTTPStatusCode = { _ in .mock(.notFound) }
+        Current.fetchHTTPStatusCode = { _ in .notFound }
 
         // MUT
         try app.test(.GET, "/unknown/package") {
@@ -43,7 +43,7 @@ class PackageController_routesTests: AppTestCase {
     }
 
     func test_show_checkingGitHubRepository_found() throws {
-        Current.fetchHTTPStatusCode = { _ in .mock(.ok) }
+        Current.fetchHTTPStatusCode = { _ in .ok }
 
         // MUT
         try app.test(.GET, "/unknown/package") {
@@ -84,7 +84,7 @@ class PackageController_routesTests: AppTestCase {
 
     func test_ShowModel_packageMissing() async throws {
         // setup
-        Current.fetchHTTPStatusCode = { _ in .mock(.ok) }
+        Current.fetchHTTPStatusCode = { _ in .ok }
 
         // MUT
         let model = try await PackageController.ShowModel(db: app.db, owner: "owner", repository: "package")
@@ -100,7 +100,7 @@ class PackageController_routesTests: AppTestCase {
 
     func test_ShowModel_packageDoesNotExist() async throws {
         // setup
-        Current.fetchHTTPStatusCode = { _ in .mock(.notFound) }
+        Current.fetchHTTPStatusCode = { _ in .notFound }
 
         // MUT
         let model = try await PackageController.ShowModel(db: app.db, owner: "owner", repository: "package")
@@ -202,8 +202,3 @@ class PackageController_routesTests: AppTestCase {
 
 
 private struct FetchError: Error { }
-
-
-private extension HTTPStatus {
-    static func mock(_ status: Self) -> Self { status }
-}
