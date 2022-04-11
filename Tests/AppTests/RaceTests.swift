@@ -12,7 +12,6 @@ class RaceTests: XCTestCase {
         try configure(app)
 
         Current = .mock(eventLoop: app.eventLoopGroup.next())
-        Current.fetchHTTPStatusCode = { _ in .notFound }
     }
 
     override func tearDown() async throws {
@@ -25,12 +24,13 @@ class RaceTests: XCTestCase {
 
     func _test() async throws {
         // Assertion failed: PostgresConnection deinitialized before being closed.
+        //        Current.fetchHTTPStatusCode = { _ in .notFound }
         //        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
 
         // Assertion failed: PostgresConnection deinitialized before being closed.
         // Sometimes fails (even with the delay) with
         // Metadata allocator corruption: allocation is NULL. curState: {(nil), 6856} - curStateReRead: {(nil), 6856} - newState: {0x30, 6808} - allocatedNewPage: false - requested size: 48 - sizeWithHeader: 48 - alignment: 8 - Tag: 14
-        let _ = try? await PackageController.ShowRoute
+        _ = try? await PackageController.ShowRoute
             .query(on: app.db, owner: "owner", repository: "repository").get()
 
         // No assertion raised
