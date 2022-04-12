@@ -29,6 +29,7 @@ class RaceTests: XCTestCase {
     func _test() async throws {
         let app = Application(.testing)
         try configure(app)
+        let db = app.db
         defer {
             usleep(100_000)
             app.shutdown()
@@ -43,7 +44,7 @@ class RaceTests: XCTestCase {
         // Sometimes fails (even with the delay) with
         // Metadata allocator corruption: allocation is NULL. curState: {(nil), 6856} - curStateReRead: {(nil), 6856} - newState: {0x30, 6808} - allocatedNewPage: false - requested size: 48 - sizeWithHeader: 48 - alignment: 8 - Tag: 14
         _ = try? await PackageController.ShowRoute
-            .query(on: app.db, owner: "owner", repository: "repository").get()
+            .query(on: db, owner: "owner", repository: "repository").get()
 
         // No assertion raised
         //        let _ = try? await Package.find(UUID(), on: app.db).unwrap()
