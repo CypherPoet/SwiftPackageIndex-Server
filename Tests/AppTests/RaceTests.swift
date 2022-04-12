@@ -3,26 +3,38 @@ import XCTVapor
 
 
 class RaceTests: XCTestCase {
-    var app: Application!
 
-    override func setUp() async throws {
-        try await super.setUp()
+//    @MainActor
+//    var app: Application!
 
-        app = Application(.testing)
-        try configure(app)
+//    @MainActor
+//    override func setUp() async throws {
+//        try await super.setUp()
+//
+//        app = Application(.testing)
+//        try configure(app)
+//
+//        Current = .mock(eventLoop: app.eventLoopGroup.next())
+//    }
 
-        Current = .mock(eventLoop: app.eventLoopGroup.next())
-    }
-
-    override func tearDown() async throws {
-        // Use Task.sleep to work around `Fatal error: Application.shutdown()` error
-        // https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/issues/1630
-        try await Task.sleep(milliseconds: 50)
-        app.shutdown()
-        try await super.tearDown()
-    }
+//    @MainActor
+//    override func tearDown() async throws {
+//        // Use Task.sleep to work around `Fatal error: Application.shutdown()` error
+//        // https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/issues/1630
+//        try await Task.sleep(milliseconds: 50)
+//        app.shutdown()
+//        try await super.tearDown()
+//    }
 
     func _test() async throws {
+        let app = Application(.testing)
+        try configure(app)
+        defer {
+            usleep(100_000)
+            app.shutdown()
+        }
+        Current = .mock(eventLoop: app.eventLoopGroup.next())
+
         // Assertion failed: PostgresConnection deinitialized before being closed.
         //        Current.fetchHTTPStatusCode = { _ in .notFound }
         //        try app.test(.GET, "/unknown/package") { XCTAssertEqual($0.status, .notFound) }
