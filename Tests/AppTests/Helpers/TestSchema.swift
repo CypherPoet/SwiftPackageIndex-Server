@@ -1,18 +1,53 @@
+@testable import App
+
+import FluentKit
 import SQLKit
 import Vapor
 
 
 actor TestSchema {
+    var app: Application!
     var isMigrated = false
     var tableNamesCache: [String]?
 
-    func autoMigrate(on app: Application) async throws {
-        guard !isMigrated else { return }
-        try await app.autoMigrate()
-        isMigrated = true
+    func db() -> Database {
+        guard let app = app else {
+            fatalError("setup() must be called before accessing the database")
+        }
+        return app.db
     }
 
-    func resetDB(on app: Application) async throws {
+    func setup(_ environment: Environment, resetDb: Bool) async throws {
+        app = Application(environment)
+        let host = try configure(app)
+
+        // Ensure `.testing` refers to "postgres" or "localhost"
+        precondition(["localhost", "postgres", "host.docker.internal"].contains(host),
+                     ".testing must be a local db, was: \(host)")
+
+        app.logger.logLevel = Environment.get("LOG_LEVEL").flatMap(Logger.Level.init(rawValue:)) ?? .warning
+
+        if !isMigrated {
+            try await app.autoMigrate()
+            isMigrated = true
+        }
+        if resetDb { try await resetDB() }
+
+        // Always start with a baseline mock environment to avoid hitting live resources
+        Current = .mock(eventLoop: app.eventLoopGroup.next())
+    }
+
+    func shutdown() {
+        guard let app = app else {
+            fatalError("setup() must be called before accessing the database")
+        }
+        app.shutdown()
+    }
+
+    func resetDB() async throws {
+        guard let app = app else {
+            fatalError("setup() must be called before accessing the database")
+        }
         guard let db = app.db as? SQLDatabase else {
             fatalError("Database must be an SQLDatabase ('as? SQLDatabase' must succeed)")
         }
@@ -30,7 +65,7 @@ actor TestSchema {
                 .all(decoding: Row.self)
                 .map(\.table_name)
             if tableNamesCache != nil {
-                try await resetDB(on: app)
+                try await resetDB()
             }
             return
         }
@@ -39,5 +74,6 @@ actor TestSchema {
             try await db.raw("TRUNCATE TABLE \(raw: table) CASCADE").run()
         }
     }
+
 }
 

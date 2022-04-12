@@ -23,29 +23,13 @@ import XCTest
 // MARK: - Test helpers
 
 
-private let testSchema = TestSchema()
-
-
 //private var _schemaCreated = false
 
-func setup(_ environment: Environment, resetDb: Bool = true) async throws -> Application {
-    let app = Application(environment)
-    let host = try configure(app)
-
-    // Ensure `.testing` refers to "postgres" or "localhost"
-    precondition(["localhost", "postgres", "host.docker.internal"].contains(host),
-                 ".testing must be a local db, was: \(host)")
-
-    app.logger.logLevel = Environment.get("LOG_LEVEL").flatMap(Logger.Level.init(rawValue:)) ?? .warning
-
-    try await testSchema.autoMigrate(on: app)
-    if resetDb { try await testSchema.resetDB(on: app) }
-
-    // Always start with a baseline mock environment to avoid hitting live resources
-    Current = .mock(eventLoop: app.eventLoopGroup.next())
-
-    return app
-}
+//@available(*, deprecated)
+//func setup(_ environment: Environment, resetDb: Bool = true) async throws -> Application {
+//    try await testSchema.setup(environment, resetDb: resetDb)
+//    return await testSchema.app
+//}
 
 
 func fixtureData(for fixture: String) throws -> Data {
