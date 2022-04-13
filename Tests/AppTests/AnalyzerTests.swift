@@ -200,31 +200,35 @@ class AnalyzerTests: AppTestCase {
         XCTAssertEqual(try RecentRelease.fetch(on: app.db).wait().count, 2)
     }
 
-    func test_analyze_version_update() throws {
+    func test_analyze_version_update() async throws {
         // Ensure that new incoming versions update the latest properties and
         // move versions in case commits change. Tests both default branch commits
         // changing as well as a tag being moved to a different commit.
         // setup
+        let db = await db()
+        let client = await client()
+        let logger = await logger()
+        let threadPool = await threadPool()
         let pkgId = UUID()
         let pkg = Package(id: pkgId, url: "1".asGithubUrl.url, processingStage: .ingestion)
-        try pkg.save(on: app.db).wait()
-        try Repository(package: pkg,
-                       defaultBranch: "main",
-                       name: "1",
-                       owner: "foo").save(on: app.db).wait()
+        try await pkg.save(on: db)
+        try await Repository(package: pkg,
+                             defaultBranch: "main",
+                             name: "1",
+                             owner: "foo").save(on: db)
         // add existing versions (to be reconciled)
-        try Version(package: pkg,
-                    commit: "commit0",
-                    commitDate: .t0,
-                    latest: .defaultBranch,
-                    packageName: "foo-1",
-                    reference: .branch("main")).save(on: app.db).wait()
-        try Version(package: pkg,
-                    commit: "commit0",
-                    commitDate: .t0,
-                    latest: .release,
-                    packageName: "foo-1",
-                    reference: .tag(1, 0, 0)).save(on: app.db).wait()
+        try await Version(package: pkg,
+                          commit: "commit0",
+                          commitDate: .t0,
+                          latest: .defaultBranch,
+                          packageName: "foo-1",
+                          reference: .branch("main")).save(on: db)
+        try await Version(package: pkg,
+                          commit: "commit0",
+                          commitDate: .t0,
+                          latest: .release,
+                          packageName: "foo-1",
+                          reference: .tag(1, 0, 0)).save(on: db)
 
         Current.fileManager.fileExists = { _ in true }
 
@@ -271,15 +275,15 @@ class AnalyzerTests: AppTestCase {
         }
 
         // MUT
-        try analyze(client: app.client,
-                    database: app.db,
-                    logger: app.logger,
-                    threadPool: app.threadPool,
-                    mode: .limit(10)).wait()
+        try await analyze(client: client,
+                          database: db,
+                          logger: logger,
+                          threadPool: threadPool,
+                          mode: .limit(10)).get()
 
         // validate versions
-        let p = try XCTUnwrap(Package.find(pkgId, on: app.db).wait())
-        try p.$versions.load(on: app.db).wait()
+        let p = try await Package.find(pkgId, on: db).unwrap()
+        try await p.$versions.load(on: db)
         let versions = p.versions.sorted(by: { $0.commitDate < $1.commitDate })
         XCTAssertEqual(versions.map(\.commitDate), [.t1, .t2, .t3])
         XCTAssertEqual(versions.map(\.reference.description), ["1.0.0", "1.1.1", "main"])

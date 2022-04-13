@@ -26,7 +26,10 @@ class AppTestCase: XCTestCase {
     var app: Application!
     let testQueue = DispatchQueue(label: "test-queue")
 
+    func client() async -> Client { await _testSchema.client() }
     func db() async -> Database { await _testSchema.db() }
+    func logger() async -> Logger { await _testSchema.logger() }
+    func threadPool() async -> NIOThreadPool { await _testSchema.threadPool() }
 
     func future<T>(_ value: T) -> EventLoopFuture<T> {
         app.eventLoopGroup.next().future(value)

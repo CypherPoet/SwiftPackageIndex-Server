@@ -10,11 +10,32 @@ actor TestSchema {
     var isMigrated = false
     var tableNamesCache: [String]?
 
+    func client() -> Client {
+        guard let app = app else {
+            fatalError("setup() must be called before accessing the database")
+        }
+        return app.client
+    }
+
     func db() -> Database {
         guard let app = app else {
             fatalError("setup() must be called before accessing the database")
         }
         return app.db
+    }
+
+    func logger() -> Logger {
+        guard let app = app else {
+            fatalError("setup() must be called before accessing the database")
+        }
+        return app.logger
+    }
+
+    func threadPool() -> NIOThreadPool {
+        guard let app = app else {
+            fatalError("setup() must be called before accessing the database")
+        }
+        return app.threadPool
     }
 
     func setup(_ environment: Environment, resetDb: Bool) async throws {
