@@ -17,10 +17,11 @@
 import Vapor
 import XCTest
 
-class PackageController_routesTests: AppTestCase {
+class PackageController_routesTests: XCTestCase {
 
-    func test_show() throws {
+    func test_show() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         let pkg = try savePackage(on: app.db, "1")
         try Repository(package: pkg, name: "package", owner: "owner")
             .save(on: app.db).wait()
@@ -32,7 +33,8 @@ class PackageController_routesTests: AppTestCase {
         }
     }
 
-    func test_show_checkingGitHubRepository_notFound() throws {
+    func test_show_checkingGitHubRepository_notFound() async throws {
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         Current.fetchHTTPStatusCode = { _ in .mock(.notFound) }
 
         // MUT
@@ -41,7 +43,8 @@ class PackageController_routesTests: AppTestCase {
         }
     }
 
-    func test_show_checkingGitHubRepository_found() throws {
+    func test_show_checkingGitHubRepository_found() async throws {
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         Current.fetchHTTPStatusCode = { _ in .mock(.ok) }
 
         // MUT
@@ -50,7 +53,8 @@ class PackageController_routesTests: AppTestCase {
         }
     }
 
-    func test_show_checkingGitHubRepository_error() throws {
+    func test_show_checkingGitHubRepository_error() async throws {
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         // Make sure we don't throw an internal server error in case
         // fetchHTTPStatusCode fails
         Current.fetchHTTPStatusCode = { _ in throw FetchError() }
@@ -63,6 +67,7 @@ class PackageController_routesTests: AppTestCase {
 
     func test_ShowModel_packageAvailable() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         let pkg = try savePackage(on: app.db, "1")
         try Repository(package: pkg, name: "package", owner: "owner")
             .save(on: app.db).wait()
@@ -83,6 +88,7 @@ class PackageController_routesTests: AppTestCase {
 
     func test_ShowModel_packageMissing() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         Current.fetchHTTPStatusCode = { _ in .mock(.ok) }
 
         // MUT
@@ -99,6 +105,7 @@ class PackageController_routesTests: AppTestCase {
 
     func test_ShowModel_packageDoesNotExist() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         Current.fetchHTTPStatusCode = { _ in .mock(.notFound) }
 
         // MUT
@@ -115,6 +122,7 @@ class PackageController_routesTests: AppTestCase {
 
     func test_ShowModel_fetchHTTPStatusCode_error() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         Current.fetchHTTPStatusCode = { _ in throw FetchError() }
 
         // MUT
@@ -129,8 +137,9 @@ class PackageController_routesTests: AppTestCase {
         }
     }
 
-    func test_readme() throws {
+    func test_readme() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         let pkg = try savePackage(on: app.db, "1")
         try Repository(package: pkg, name: "package", owner: "owner")
             .save(on: app.db).wait()
@@ -142,8 +151,9 @@ class PackageController_routesTests: AppTestCase {
         }
     }
 
-    func test_releases() throws {
+    func test_releases() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         let pkg = try savePackage(on: app.db, "1")
         try Repository(package: pkg, name: "package", owner: "owner")
             .save(on: app.db).wait()
@@ -155,8 +165,9 @@ class PackageController_routesTests: AppTestCase {
         }
     }
 
-    func test_builds() throws {
+    func test_builds() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         let pkg = try savePackage(on: app.db, "1")
         try Repository(package: pkg, name: "package", owner: "owner")
             .save(on: app.db).wait()
@@ -168,8 +179,9 @@ class PackageController_routesTests: AppTestCase {
         }
     }
 
-    func test_maintainerInfo() throws {
+    func test_maintainerInfo() async throws {
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         let pkg = try savePackage(on: app.db, "1")
         try Repository(package: pkg, name: "package", owner: "owner")
             .save(on: app.db).wait()
@@ -182,9 +194,10 @@ class PackageController_routesTests: AppTestCase {
         }
     }
 
-    func test_maintainerInfo_no_packageName() throws {
+    func test_maintainerInfo_no_packageName() async throws {
         // Ensure we display the page even if packageName is not set
         // setup
+        let app = try await _testSchema.setup(.testing, resetDb: true)
         let pkg = try savePackage(on: app.db, "1")
         try Repository(package: pkg, name: "package", owner: "owner")
             .save(on: app.db).wait()
@@ -203,7 +216,7 @@ class PackageController_routesTests: AppTestCase {
 private struct FetchError: Error {
     init() {
         // See https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/pull/1606#issuecomment-1075391125 as to why we're adding this delay
-        usleep(.milliseconds(100))
+//        usleep(.milliseconds(100))
     }
 }
 
@@ -211,7 +224,7 @@ private struct FetchError: Error {
 private extension HTTPStatus {
     static func mock(_ status: Self) -> Self {
         // See https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/pull/1606#issuecomment-1075391125 as to why we're adding this delay
-        usleep(.milliseconds(100))
+//        usleep(.milliseconds(100))
         return status
     }
 }

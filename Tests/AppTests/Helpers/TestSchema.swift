@@ -6,67 +6,73 @@ import Vapor
 
 
 actor TestSchema {
-    var app: Application!
-    var isMigrated = false
-    var tableNamesCache: [String]?
+    private var _app: Application!
+    private var isMigrated = false
+    private var tableNamesCache: [String]?
 
     func client() -> Client {
-        guard let app = app else {
+        guard let app = _app else {
             fatalError("setup() must be called before accessing the database")
         }
         return app.client
     }
 
     func db() -> Database {
-        guard let app = app else {
+        guard let app = _app else {
             fatalError("setup() must be called before accessing the database")
         }
         return app.db
     }
 
     func logger() -> Logger {
-        guard let app = app else {
+        guard let app = _app else {
             fatalError("setup() must be called before accessing the database")
         }
         return app.logger
     }
 
     func threadPool() -> NIOThreadPool {
-        guard let app = app else {
+        guard let app = _app else {
             fatalError("setup() must be called before accessing the database")
         }
         return app.threadPool
     }
 
-    func setup(_ environment: Environment, resetDb: Bool) async throws {
-        app = Application(environment)
-        let host = try configure(app)
+    func setup(_ environment: Environment, resetDb: Bool) async throws -> Application {
+        if _app != nil {
+            shutdown()
+        }
+        _app = Application(environment)
+        let host = try configure(_app)
 
         // Ensure `.testing` refers to "postgres" or "localhost"
         precondition(["localhost", "postgres", "host.docker.internal"].contains(host),
                      ".testing must be a local db, was: \(host)")
 
-        app.logger.logLevel = Environment.get("LOG_LEVEL").flatMap(Logger.Level.init(rawValue:)) ?? .warning
+        _app.logger.logLevel = Environment.get("LOG_LEVEL").flatMap(Logger.Level.init(rawValue:)) ?? .warning
 
         if !isMigrated {
-            try await app.autoMigrate()
+            try await _app.autoMigrate()
             isMigrated = true
         }
         if resetDb { try await resetDB() }
 
         // Always start with a baseline mock environment to avoid hitting live resources
-        Current = .mock(eventLoop: app.eventLoopGroup.next())
+        Current = .mock(eventLoop: _app.eventLoopGroup.next())
+
+        return _app
     }
 
     func shutdown() {
-        guard let app = app else {
+        guard let app = _app else {
             fatalError("setup() must be called before accessing the database")
         }
         app.shutdown()
+        _app = nil
     }
 
     func resetDB() async throws {
-        guard let app = app else {
+        guard let app = _app else {
             fatalError("setup() must be called before accessing the database")
         }
         guard let db = app.db as? SQLDatabase else {

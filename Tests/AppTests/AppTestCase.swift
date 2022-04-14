@@ -18,7 +18,7 @@ import XCTVapor
 @testable import App
 
 
-private let _testSchema = TestSchema()
+let _testSchema = TestSchema()
 
 
 class AppTestCase: XCTestCase {
@@ -41,8 +41,7 @@ class AppTestCase: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        try await _testSchema.setup(.testing, resetDb: true)
-        app = await _testSchema.app
+        app = try await _testSchema.setup(.testing, resetDb: true)
     }
     
     override func tearDown() async throws {
