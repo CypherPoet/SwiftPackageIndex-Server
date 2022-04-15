@@ -17,6 +17,7 @@
 import Vapor
 import XCTest
 
+
 class PackageController_routesTests: XCTestCase {
 
     func test_show() async throws {
@@ -35,7 +36,9 @@ class PackageController_routesTests: XCTestCase {
 
     func test_show_checkingGitHubRepository_notFound() async throws {
         let app = try await _testSchema.setup(.testing, resetDb: true)
-        Current.fetchHTTPStatusCode = { _ in .mock(.notFound) }
+        await _testSchema.updateEnvironment { env in
+            env.fetchHTTPStatusCode = { _ in .notFound }
+        }
 
         // MUT
         try app.test(.GET, "/unknown/package") {
@@ -45,7 +48,9 @@ class PackageController_routesTests: XCTestCase {
 
     func test_show_checkingGitHubRepository_found() async throws {
         let app = try await _testSchema.setup(.testing, resetDb: true)
-        Current.fetchHTTPStatusCode = { _ in .mock(.ok) }
+        await _testSchema.updateEnvironment { env in
+            env.fetchHTTPStatusCode = { _ in .ok }
+        }
 
         // MUT
         try app.test(.GET, "/unknown/package") {
@@ -57,7 +62,9 @@ class PackageController_routesTests: XCTestCase {
         let app = try await _testSchema.setup(.testing, resetDb: true)
         // Make sure we don't throw an internal server error in case
         // fetchHTTPStatusCode fails
-        Current.fetchHTTPStatusCode = { _ in throw FetchError() }
+        await _testSchema.updateEnvironment { env in
+            env.fetchHTTPStatusCode = { _ in throw FetchError() }
+        }
 
         // MUT
         try app.test(.GET, "/unknown/package") {
@@ -89,7 +96,9 @@ class PackageController_routesTests: XCTestCase {
     func test_ShowModel_packageMissing() async throws {
         // setup
         let app = try await _testSchema.setup(.testing, resetDb: true)
-        Current.fetchHTTPStatusCode = { _ in .mock(.ok) }
+        await _testSchema.updateEnvironment { env in
+            env.fetchHTTPStatusCode = { _ in .ok }
+        }
 
         // MUT
         let model = try await PackageController.ShowModel(db: app.db, owner: "owner", repository: "package")
@@ -106,7 +115,9 @@ class PackageController_routesTests: XCTestCase {
     func test_ShowModel_packageDoesNotExist() async throws {
         // setup
         let app = try await _testSchema.setup(.testing, resetDb: true)
-        Current.fetchHTTPStatusCode = { _ in .mock(.notFound) }
+        await _testSchema.updateEnvironment { env in
+            env.fetchHTTPStatusCode = { _ in .notFound }
+        }
 
         // MUT
         let model = try await PackageController.ShowModel(db: app.db, owner: "owner", repository: "package")
@@ -123,7 +134,9 @@ class PackageController_routesTests: XCTestCase {
     func test_ShowModel_fetchHTTPStatusCode_error() async throws {
         // setup
         let app = try await _testSchema.setup(.testing, resetDb: true)
-        Current.fetchHTTPStatusCode = { _ in throw FetchError() }
+        await _testSchema.updateEnvironment { env in
+            env.fetchHTTPStatusCode = { _ in throw FetchError() }
+        }
 
         // MUT
         let model = try await PackageController.ShowModel(db: app.db, owner: "owner", repository: "package")
@@ -213,25 +226,4 @@ class PackageController_routesTests: XCTestCase {
 }
 
 
-private struct FetchError: Error {
-    init() {
-        // See https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/pull/1606#issuecomment-1075391125 as to why we're adding this delay
-//        usleep(.milliseconds(100))
-    }
-}
-
-
-private extension HTTPStatus {
-    static func mock(_ status: Self) -> Self {
-        // See https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/pull/1606#issuecomment-1075391125 as to why we're adding this delay
-//        usleep(.milliseconds(100))
-        return status
-    }
-}
-
-
-private extension useconds_t {
-    static func milliseconds(_ count: Int) -> Self {
-        useconds_t(count * 1_000)
-    }
-}
+private struct FetchError: Error { }

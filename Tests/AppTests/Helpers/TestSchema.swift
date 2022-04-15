@@ -102,5 +102,9 @@ actor TestSchema {
         }
     }
 
+    func updateEnvironment(_ update: (inout AppEnvironment) -> Void) async {
+        update(&Current)
+    }
+
 }
 
